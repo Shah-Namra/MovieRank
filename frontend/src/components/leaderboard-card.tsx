@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui/heading";
 import { Subheading } from "@/components/ui/subheading";
-import MoviePoster from "./movie-poster";
-import VersusDisplay from "../versus-display";
-import LoadingState from "../loading-state";
-import ErrorState from "../error-state";
+import MoviePoster from "./Home/movie-poster";
+import VersusDisplay from "./versus-display";
+import LoadingState from "./loading-state";
+import ErrorState from "./error-state";
 import { useMoviePair, useCompare } from "@/hooks/useMovies";
 import { Sparkles } from "lucide-react";
 
@@ -61,7 +61,7 @@ export default function Hero() {
             className="flex items-center justify-center gap-2 mb-4"
           >
             <Sparkles className="h-5 w-5 text-yellow-400" />
-            <span className="text-sm font-semibold text-black/60 uppercase tracking-wider">
+            <span className="text-sm font-semibold text-white/60 uppercase tracking-wider">
               Movie Battle
             </span>
             <Sparkles className="h-5 w-5 text-yellow-400" />
@@ -122,21 +122,21 @@ export default function Hero() {
                 transition={{ delay: 0.4 }}
                 className="mt-12 text-center"
               >
-                <div className="inline-flex items-center gap-6 px-6 py-3 rounded-full bg-black/5 border border-black/10 backdrop-blur-sm">
+                <div className="inline-flex items-center gap-6 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
                   <div className="flex flex-col items-center">
-                    <span className="text-xs text-black/60 font-medium uppercase tracking-wide">
+                    <span className="text-xs text-white/60 font-medium uppercase tracking-wide">
                       Comparisons
                     </span>
-                    <span className="text-lg font-bold text-black">
+                    <span className="text-lg font-bold text-white">
                       {movie1.total_comparisons + movie2.total_comparisons}
                     </span>
                   </div>
-                  <div className="w-px h-8 bg-black/10" />
+                  <div className="w-px h-8 bg-white/10" />
                   <div className="flex flex-col items-center">
-                    <span className="text-xs text-black/60 font-medium uppercase tracking-wide">
+                    <span className="text-xs text-white/60 font-medium uppercase tracking-wide">
                       Rating Diff
                     </span>
-                    <span className="text-lg font-bold text-black">
+                    <span className="text-lg font-bold text-white">
                       {Math.abs(
                         Math.round(movie1.elo_rating - movie2.elo_rating)
                       )}

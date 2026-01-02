@@ -3,19 +3,18 @@ import { cn } from "@/lib/utils";
 
 export const Subheading = ({
   children,
-  className,
+  className = "",
   as = "p",
 }: {
   children: React.ReactNode;
   className?: string;
-  as?: "h1" | "h2" | "p";
+  as?: "p" | "h2" | "h3";
 }) => {
   const Tag = as;
+
   return (
     <Tag
-      className={cn(
-        "text-base md:text-lg text-neutral-400 dark:text-neutral-600 font-inter max-w-xl pr-4 py-8"
-      )}
+      className={`text-base md:text-lg text-neutral-400 leading-relaxed max-w-2xl ${className}`}
     >
       {children}
     </Tag>

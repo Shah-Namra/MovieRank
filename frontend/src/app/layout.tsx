@@ -3,6 +3,7 @@ import { Inter, Manrope, Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { QueryProvider } from "@/providers/query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,7 +48,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="bg-background text-foreground">{children}</main>
+          <QueryProvider>
+            <main className="bg-background text-foreground">{children}</main>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
