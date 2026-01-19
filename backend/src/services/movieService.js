@@ -30,7 +30,7 @@ class MovieService {
           const movie1 = movies[i];
           const movie2 = movies[j];
           const ratingDiff = Math.abs(
-            parseFloat(movie1.elo_rating) - parseFloat(movie2.elo_rating)
+            parseFloat(movie1.elo_rating) - parseFloat(movie2.elo_rating),
           );
           const weight = EloCalculator.getPairingWeight(ratingDiff);
 
@@ -93,7 +93,7 @@ class MovieService {
          WHERE id = ANY($1::int[])
          ORDER BY id
          FOR UPDATE`,
-        [movieIds]
+        [movieIds],
       );
 
       if (lockedMovies.rows.length !== 2) {
@@ -118,7 +118,7 @@ class MovieService {
              total_comparisons = total_comparisons + 1,
              wins = wins + 1
          WHERE id = $2`,
-        [eloResult.winner.newRating, winnerId]
+        [eloResult.winner.newRating, winnerId],
       );
 
       // Update loser
@@ -128,7 +128,7 @@ class MovieService {
              total_comparisons = total_comparisons + 1,
              losses = losses + 1
          WHERE id = $2`,
-        [eloResult.loser.newRating, loserId]
+        [eloResult.loser.newRating, loserId],
       );
 
       // Record comparison in history
@@ -149,7 +149,7 @@ class MovieService {
           eloResult.winner.change,
           eloResult.winner.kFactor,
           eloResult.loser.kFactor,
-        ]
+        ],
       );
 
       await client.query("COMMIT");
@@ -181,8 +181,23 @@ class MovieService {
     }
   }
 
-  // Get leaderboard with min comparison threshold
+  // leaderboard with min comparison threshold
   static async getLeaderboard(limit = 50, minComparisons = 20) {
+    console.log(
+      `Getting leaderboard with minComparisons=${minComparisons}, limit=${limit}`,
+    );
+
+    // how many movies have enough comparisons
+    const countResult = await db.query(
+      `SELECT COUNT(*) as total FROM movies WHERE total_comparisons >= $1`,
+      [minComparisons],
+    );
+    console.log(
+      `Movies with ${minComparisons}+ comparisons:`,
+      countResult.rows[0].total,
+    );
+
+    // actual leaderboard
     const result = await db.query(
       `SELECT 
         id, tmdb_id, title, release_year, poster_path,
@@ -192,8 +207,22 @@ class MovieService {
        WHERE total_comparisons >= $1
        ORDER BY elo_rating DESC
        LIMIT $2`,
-      [minComparisons, limit]
+      [minComparisons, limit],
     );
+
+    console.log(`Returning ${result.rows.length} movies`);
+
+    // CONSOLE LOG Show first 3 movies
+    if (result.rows.length > 0) {
+      console.log(
+        "Top 3 movies:",
+        result.rows.slice(0, 3).map((m) => ({
+          title: m.title,
+          elo: m.elo_rating,
+          comparisons: m.total_comparisons,
+        })),
+      );
+    }
 
     return result.rows.map((movie, index) => ({
       ...movie,
@@ -210,7 +239,7 @@ class MovieService {
         (SELECT COUNT(*) FROM movies WHERE elo_rating > m.elo_rating AND total_comparisons >= $2) + 1 as rank
        FROM movies m
        WHERE m.id = $1`,
-      [id, process.env.MIN_COMPARISONS_FOR_LEADERBOARD || 20]
+      [id, process.env.MIN_COMPARISONS_FOR_LEADERBOARD || 20],
     );
 
     if (result.rows.length === 0) {
@@ -243,7 +272,7 @@ class MovieService {
        WHERE c.winner_id = $1 OR c.loser_id = $1
        ORDER BY c.created_at DESC
        LIMIT $2`,
-      [movieId, limit]
+      [movieId, limit],
     );
 
     return result.rows;

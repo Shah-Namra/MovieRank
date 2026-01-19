@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+// Backend runs on 3000, frontend on 3001
 const API_BASE = "http://localhost:3000/api";
 
 interface Movie {
@@ -60,9 +61,15 @@ export function useMoviePair() {
   return useQuery<MoviePairResponse>({
     queryKey: ["moviePair"],
     queryFn: async () => {
+      console.log("Fetching movie pair...");
       const res = await fetch(`${API_BASE}/movies/pair`);
-      if (!res.ok) throw new Error("Failed to fetch movie pair");
-      return res.json();
+      if (!res.ok) {
+        console.error("Failed to fetch movie pair-->", res.status);
+        throw new Error("Failed to fetch movie pair");
+      }
+      const data = await res.json();
+      console.log("Movie pair loaded");
+      return data;
     },
     staleTime: 0,
     refetchOnWindowFocus: false,
@@ -81,19 +88,34 @@ export function useCompare() {
       winnerId: number;
       loserId: number;
     }) => {
+      console.log("Submitting vote==>", { winnerId, loserId });
+
       const res = await fetch(`${API_BASE}/movies/compare`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ winnerId, loserId }),
       });
-      if (!res.ok) throw new Error("Failed to submit vote");
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ Vote failed:", {
+          status: res.status,
+          error: errorText,
+        });
+        throw new Error("Failed to submit vote");
+      }
+
       const data: CompareResponse = await res.json();
+      console.log(" Vote successful!!");
       return data;
     },
     onSuccess: () => {
-      // Invalidate to get new pair
+      console.log("===Getting new movie pair...===");
       queryClient.invalidateQueries({ queryKey: ["moviePair"] });
       queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+    onError: (error) => {
+      console.error("💥 Mutation error:", error);
     },
   });
 }
@@ -104,9 +126,12 @@ export function useLeaderboard(limit = 50, minComparisons = 20) {
     queryKey: ["leaderboard", limit, minComparisons],
     queryFn: async () => {
       const res = await fetch(
-        `${API_BASE}/movies/leaderboard?limit=${limit}&minComparisons=${minComparisons}`
+        `${API_BASE}/movies/leaderboard?limit=${limit}&minComparisons=${minComparisons}`,
       );
-      if (!res.ok) throw new Error("Failed to fetch leaderboard");
+      if (!res.ok) {
+        console.error("Failed to fetch leaderboard");
+        throw new Error("Failed to fetch leaderboard");
+      }
       return res.json();
     },
   });
@@ -132,7 +157,7 @@ export function useMovieHistory(id: string | number, limit = 20) {
     queryKey: ["movieHistory", id, limit],
     queryFn: async () => {
       const res = await fetch(
-        `${API_BASE}/movies/${id}/history?limit=${limit}`
+        `${API_BASE}/movies/${id}/history?limit=${limit}`,
       );
       if (!res.ok) throw new Error("Failed to fetch history");
       const data = await res.json();

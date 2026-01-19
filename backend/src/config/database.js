@@ -1,18 +1,16 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
-// PostgreSQL connection pool for efficient connection management
-// Supports both DATABASE_URL (Neon, Supabase) and individual parameters
 const pool = new Pool(
   process.env.DATABASE_URL
     ? {
         connectionString: process.env.DATABASE_URL,
         ssl: {
-          rejectUnauthorized: false, // Required for most cloud PostgreSQL providers
+          rejectUnauthorized: false,
         },
-        max: 10, // Reduced pool size for serverless
-        idleTimeoutMillis: 20000, // Close idle connections faster
-        connectionTimeoutMillis: 10000, // Increase connection timeout
+        max: 10, // Limits Max Connections
+        idleTimeoutMillis: 20000,
+        connectionTimeoutMillis: 10000,
         keepAlive: true,
         keepAliveInitialDelayMillis: 10000,
       }
@@ -25,16 +23,16 @@ const pool = new Pool(
         max: 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,
-      }
+      },
 );
 
 // Test database connection
 pool.on("connect", (client) => {
-  console.log("Database connected successfully");
+  console.log("DB connected successfully");
 });
 
 pool.on("error", (err, client) => {
-  console.error("Unexpected database error:", err);
+  console.error("Unexpected db error:", err);
 });
 
 // Handle connection errors gracefully

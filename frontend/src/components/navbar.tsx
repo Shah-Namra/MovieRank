@@ -1,186 +1,189 @@
 "use client";
-import { Film, Trophy, Zap, Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { useState, useEffect } from "react";
-import { Container } from "./ui/container";
+import { motion, AnimatePresence } from "framer-motion";
+import { Container } from "@/components/ui/container";
+import {
+  FilmIcon,
+  BoltIcon,
+  TrophyIcon,
+  MenuIcon,
+  CloseIcon,
+} from "@/components/icons";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 const navItems = [
-  { path: "/", label: "Compare", icon: Zap },
-  { path: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { path: "/", label: "Battle", icon: BoltIcon },
+  { path: "/leaderboard", label: "Leaderboard", icon: TrophyIcon },
 ];
 
-export default function Navbar() {
-  const [pathname, setPathname] = useState("/");
+export function Navbar() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <>
-      <motion.header
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+    <header className="fixed top-0 left-0 right-0 z-50">
+      <motion.div
+        initial={false}
+        animate={{
+          backgroundColor: scrolled
+            ? "rgba(255, 255, 255, 0.9)"
+            : "rgba(255, 255, 255, 0.7)",
+          backdropFilter: scrolled ? "blur(20px)" : "blur(12px)",
+        }}
+        transition={{ duration: 0.2 }}
+        className={cn(
+          "border-b transition-colors duration-200",
+          scrolled ? "border-border shadow-soft" : "border-transparent",
+        )}
       >
-        {/* Backdrop blur container */}
-        <div
-          className={`transition-all duration-300 ${
-            scrolled
-              ? "bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20"
-              : "bg-black/60 backdrop-blur-lg"
-          }`}
-        >
-          <Container>
-            <div className="flex h-16 items-center justify-between">
-              {/* Logo - MORE CHARACTER */}
-              <button
-                onClick={() => setPathname("/")}
-                className="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-white/20 rounded-lg px-1 -ml-1"
-              >
-                <motion.div
-                  className="relative"
-                  whileHover={{ rotate: 15, scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                >
-                  <Film className="h-6 w-6 text-white" strokeWidth={2} />
-
-                  {/* Sparkle on hover */}
-                  <motion.div
-                    className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-white"
-                    initial={{ scale: 0, opacity: 0 }}
-                    whileHover={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </motion.div>
-
-                <div className="flex flex-col items-start">
-                  <span className="font-bold text-base tracking-tight text-white leading-none">
-                    CinemaRank
-                  </span>
-                  <span className="text-[10px] text-white/40 font-medium tracking-wide uppercase leading-none mt-0.5">
-                    Battle
-                  </span>
+        <Container>
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center gap-3 group focus-ring rounded-lg -ml-2 pl-2 pr-3 py-1.5"
+            >
+              <div className="w-9 h-9 rounded-xl bg-foreground flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+                <FilmIcon
+                  className="h-5 w-5 text-background"
+                  strokeWidth={1.5}
+                />
+              </div>
+              <div className="hidden sm:block">
+                <div className="font-bold text-lg text-foreground leading-none tracking-tight">
+                  CinemaRank
                 </div>
-              </button>
+                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest mt-0.5">
+                  Battle
+                </div>
+              </div>
+            </Link>
 
-              {/* Desktop Nav */}
-              <nav className="hidden sm:flex items-center gap-1">
-                {navItems.map((item) => {
+            {/* Desktop Navigation */}
+            <nav className="hidden sm:flex items-center gap-1">
+              {navItems.map((item) => {
+                const isActive = pathname === item.path;
+
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={cn(
+                      "relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 focus-ring",
+                      isActive
+                        ? "text-foreground bg-secondary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" strokeWidth={2} />
+                    <span>{item.label}</span>
+
+                    {/* Active indicator dot */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-indicator"
+                        className="absolute -bottom-2.25 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-foreground"
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="sm:hidden p-2.5 rounded-lg hover:bg-secondary transition-colors focus-ring"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {mobileOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <CloseIcon className="h-5 w-5 text-foreground" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ opacity: 0, rotate: 90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: -90 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <MenuIcon className="h-5 w-5 text-foreground" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
+        </Container>
+      </motion.div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="sm:hidden bg-card/95 backdrop-blur-xl border-b border-border overflow-hidden"
+          >
+            <Container>
+              <nav className="py-4 space-y-1">
+                {navItems.map((item, index) => {
                   const isActive = pathname === item.path;
                   const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.path}
-                      onClick={() => setPathname(item.path)}
-                      className="relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/20 text-white/60 hover:text-white"
-                    >
-                      <Icon className="h-4 w-4" strokeWidth={2.5} />
-                      <span>{item.label}</span>
 
-                      {/* Active indicator - BETTER ANIMATION */}
-                      {isActive && (
-                        <>
-                          <motion.div
-                            layoutId="navbar-bg"
-                            className="absolute inset-0 bg-white/10 rounded-lg -z-10"
-                            transition={{
-                              type: "spring",
-                              bounce: 0.2,
-                              duration: 0.6,
-                            }}
-                          />
-                        </>
-                      )}
-                    </button>
+                  return (
+                    <motion.div
+                      key={item.path}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Link
+                        href={item.path}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-colors",
+                          isActive
+                            ? "bg-secondary text-foreground"
+                            : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground",
+                        )}
+                      >
+                        <Icon className="h-5 w-5" strokeWidth={2} />
+                        <span>{item.label}</span>
+                      </Link>
+                    </motion.div>
                   );
                 })}
               </nav>
-
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                className="sm:hidden p-2 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
-              >
-                <AnimatePresence mode="wait">
-                  {mobileOpen ? (
-                    <motion.div
-                      key="close"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <X className="h-5 w-5 text-white" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="menu"
-                      initial={{ rotate: 90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: -90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Menu className="h-5 w-5 text-white" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </button>
-            </div>
-          </Container>
-        </div>
-
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="sm:hidden border-t border-white/10 bg-black/95 backdrop-blur-xl overflow-hidden"
-            >
-              <Container>
-                <nav className="py-4 space-y-1">
-                  {navItems.map((item, i) => {
-                    const isActive = pathname === item.path;
-                    const Icon = item.icon;
-                    return (
-                      <motion.button
-                        key={item.path}
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: i * 0.1 }}
-                        onClick={() => {
-                          setPathname(item.path);
-                          setMobileOpen(false);
-                        }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
-                          isActive
-                            ? "bg-white/10 text-white"
-                            : "text-white/60 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" strokeWidth={2.5} />
-                        <span>{item.label}</span>
-                      </motion.button>
-                    );
-                  })}
-                </nav>
-              </Container>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
-
-      {/* Demo content */}
-    </>
+            </Container>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   );
 }

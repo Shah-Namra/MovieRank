@@ -1,6 +1,7 @@
 "use client";
+
 import { motion } from "framer-motion";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertIcon, RefreshIcon } from "@/components/icons";
 
 interface ErrorStateProps {
   title?: string;
@@ -8,30 +9,32 @@ interface ErrorStateProps {
   onRetry?: () => void;
 }
 
-export default function ErrorState({
+export function ErrorState({
   title = "Something went wrong",
   message = "Unable to load data. Please try again.",
   onRetry,
 }: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4">
+      {/* Error icon */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{
           type: "spring",
-          stiffness: 200,
-          damping: 15,
+          stiffness: 260,
+          damping: 20,
         }}
       >
-        <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-          <AlertCircle className="h-10 w-10 text-red-400" strokeWidth={2} />
+        <div className="w-20 h-20 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+          <AlertIcon className="h-10 w-10 text-destructive" strokeWidth={1.5} />
         </div>
       </motion.div>
 
+      {/* Text */}
       <div className="space-y-2 max-w-md">
         <motion.h3
-          className="text-2xl font-bold text-white"
+          className="text-xl font-semibold text-foreground"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -39,7 +42,7 @@ export default function ErrorState({
           {title}
         </motion.h3>
         <motion.p
-          className="text-white/60"
+          className="text-muted-foreground"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -48,18 +51,19 @@ export default function ErrorState({
         </motion.p>
       </div>
 
+      {/* Retry button */}
       {onRetry && (
         <motion.button
           onClick={onRetry}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-foreground text-background font-semibold transition-all hover:bg-foreground/90 active:scale-[0.98] focus-ring"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <RefreshCw className="h-4 w-4" />
-          Try Again
+          <RefreshIcon className="h-4 w-4" />
+          <span>Try Again</span>
         </motion.button>
       )}
     </div>
