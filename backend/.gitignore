@@ -33,3 +33,6 @@ coverage/
 # Build
 dist/
 build/
+
+./scripts/analyzeAndBenchmark.js
+./scripts/addIndex.js

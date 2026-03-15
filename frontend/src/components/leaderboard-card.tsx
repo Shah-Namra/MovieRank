@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui/heading";
 import { Subheading } from "@/components/ui/subheading";
-import MoviePoster from "./Home/movie-poster";
-import VersusDisplay from "./versus-display";
-import LoadingState from "./loading-state";
-import ErrorState from "./error-state";
+import { MoviePoster } from "./Home/movie-poster";
+import { VersusDisplay } from "./versus-display";
+import { LoadingState } from "./loading-state";
+import { ErrorState } from "./error-state";
 import { useMoviePair, useCompare } from "@/hooks/useMovies";
 import { Sparkles } from "lucide-react";
 
@@ -67,7 +67,7 @@ export default function Hero() {
             <Sparkles className="h-5 w-5 text-yellow-400" />
           </motion.div>
 
-          <Heading>Which movie reigns supreme?</Heading>
+          {/* <Heading></Heading> */}
           <Subheading>
             Choose your favorite and watch the rankings evolve
           </Subheading>
@@ -138,7 +138,7 @@ export default function Hero() {
                     </span>
                     <span className="text-lg font-bold text-white">
                       {Math.abs(
-                        Math.round(movie1.elo_rating - movie2.elo_rating)
+                        Math.round(movie1.elo_rating - movie2.elo_rating),
                       )}
                     </span>
                   </div>

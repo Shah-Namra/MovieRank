@@ -11,42 +11,40 @@ const PORT = process.env.PORT || 3000;
 
 app.use(helmet());
 
+// CORS — cache preflight for 24h so the browser doesn't fire an OPTIONS
+// round-trip before every POST /compare. Without this, each vote costs
+// 2 × RTT (OPTIONS + POST) instead of 1 × RTT.
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+    maxAge: 86400, // 24h preflight cache — eliminates OPTIONS overhead
+  }),
 );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//rate limiting
 app.use("/api/", apiLimiter);
-
 app.use("/api/movies/compare", comparisonLimiter);
 
-// Health
+// Health check — also used as keep-alive ping target
 app.get("/health", (req, res) => {
   res.json({
     success: true,
     message: "Server is running",
     timestamp: new Date().toISOString(),
+    uptime: Math.round(process.uptime()),
   });
 });
 
 app.use("/api/movies", movieRoutes);
 
-// 404
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: "Route not found",
-  });
+  res.status(404).json({ success: false, error: "Route not found" });
 });
 
-// Global
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({
@@ -56,20 +54,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Started
-app.listen(PORT, () => {
-  console.log(`Movie Ranker API Server`);
-  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
-  console.log(`API endpoint: http://localhost:${PORT}/api/movies`);
+const server = app.listen(PORT, () => {
+  console.log(
+    `CinemaRank API — port ${PORT} — ${process.env.NODE_ENV || "development"}`,
+  );
+  console.log(`Health: http://localhost:${PORT}/health`);
 });
 
-// Shutdown
 process.on("SIGTERM", () => {
-  console.log("SIGTERM signal received: closing HTTP server");
   server.close(() => {
-    console.log("HTTP server closed");
+    console.log("Server closed");
     process.exit(0);
   });
 });

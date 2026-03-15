@@ -2,22 +2,81 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Container } from "@/components/ui/container";
-import {
-  FilmIcon,
-  BoltIcon,
-  TrophyIcon,
-  MenuIcon,
-  CloseIcon,
-} from "@/components/icons";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
-const navItems = [
-  { path: "/", label: "Battle", icon: BoltIcon },
-  { path: "/leaderboard", label: "Leaderboard", icon: TrophyIcon },
-];
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="w-8 h-8" />;
+
+  const isDark = theme === "dark";
+
+  return (
+    <button
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className="relative w-14 h-7 rounded-full transition-colors duration-400 focus:outline-none"
+      style={{
+        background: isDark ? "rgba(245,200,66,0.12)" : "rgba(200,146,10,0.15)",
+        border: "1px solid var(--amber)",
+      }}
+      aria-label="Toggle theme"
+      title={isDark ? "Switch to Day mode" : "Switch to Night mode"}
+    >
+      {/* Track icons */}
+      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] select-none">
+        {/* Moon */}
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          style={{
+            color: isDark ? "var(--amber)" : "var(--text-dim)",
+            transition: "color 0.3s",
+          }}
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+        </svg>
+      </span>
+      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] select-none">
+        {/* Sun */}
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          style={{
+            color: !isDark ? "var(--amber)" : "var(--text-dim)",
+            transition: "color 0.3s",
+          }}
+        >
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+      </span>
+      {/* Knob */}
+      <motion.div
+        animate={{ x: isDark ? 2 : 28 }}
+        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+        className="absolute top-1 w-5 h-5 rounded-full"
+        style={{ background: "var(--amber)" }}
+      />
+    </button>
+  );
+}
 
 export function Navbar() {
   const pathname = usePathname();
@@ -32,155 +91,137 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      <motion.div
-        initial={false}
-        animate={{
-          backgroundColor: scrolled
-            ? "rgba(255, 255, 255, 0.9)"
-            : "rgba(255, 255, 255, 0.7)",
-          backdropFilter: scrolled ? "blur(20px)" : "blur(12px)",
-        }}
-        transition={{ duration: 0.2 }}
+      <div
         className={cn(
-          "border-b transition-colors duration-200",
-          scrolled ? "border-border shadow-soft" : "border-transparent",
+          "transition-all duration-300",
+          scrolled
+            ? "bg-[var(--background)]/88 backdrop-blur-xl border-b"
+            : "bg-transparent border-b border-transparent",
         )}
+        style={{ borderColor: scrolled ? "var(--border)" : "transparent" }}
       >
-        <Container>
-          <div className="flex h-16 items-center justify-between">
+        <div className="px-6">
+          <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-3 group focus-ring rounded-lg -ml-2 pl-2 pr-3 py-1.5"
-            >
-              <div className="w-9 h-9 rounded-xl bg-foreground flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                <FilmIcon
-                  className="h-5 w-5 text-background"
-                  strokeWidth={1.5}
+            <Link href="/" className="group flex items-center gap-3 shrink-0">
+              <div className="relative">
+                <div
+                  className="w-7 h-7 rounded-sm transition-transform duration-300 group-hover:rotate-[50deg]"
+                  style={{
+                    background: "var(--amber)",
+                    transform: "rotate(45deg)",
+                  }}
                 />
               </div>
-              <div className="hidden sm:block">
-                <div className="font-bold text-lg text-foreground leading-none tracking-tight">
-                  CinemaRank
-                </div>
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest mt-0.5">
-                  Battle
-                </div>
+              <div
+                className="font-black text-[15px] tracking-[0.15em] uppercase"
+                style={{ color: "var(--foreground)" }}
+              >
+                Cinema<span style={{ color: "var(--amber)" }}>Rank</span>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden sm:flex items-center gap-1">
-              {navItems.map((item) => {
+            {/* Desktop nav */}
+            <nav className="hidden sm:flex items-center gap-6">
+              {[
+                { path: "/", label: "Battle" },
+                { path: "/leaderboard", label: "Ranks" },
+              ].map((item) => {
                 const isActive = pathname === item.path;
-
-                const Icon = item.icon;
-
                 return (
                   <Link
                     key={item.path}
                     href={item.path}
-                    className={cn(
-                      "relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 focus-ring",
-                      isActive
-                        ? "text-foreground bg-secondary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
-                    )}
+                    className="relative px-1 py-2 text-[12px] font-black tracking-[0.14em] uppercase transition-colors duration-200"
+                    style={{
+                      color: isActive
+                        ? "var(--amber)"
+                        : "var(--text-secondary)",
+                    }}
                   >
-                    <Icon className="h-4 w-4" strokeWidth={2} />
-                    <span>{item.label}</span>
-
-                    {/* Active indicator dot */}
+                    {item.label}
                     {isActive && (
                       <motion.div
-                        layoutId="nav-indicator"
-                        className="absolute -bottom-2.25 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-foreground"
+                        layoutId="nav-bar"
+                        className="absolute bottom-0 left-0 right-0 h-[2px]"
+                        style={{ background: "var(--amber)" }}
                         transition={{
                           type: "spring",
-                          stiffness: 400,
-                          damping: 30,
+                          stiffness: 500,
+                          damping: 40,
                         }}
                       />
                     )}
                   </Link>
                 );
               })}
+
+              <ThemeToggle />
             </nav>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="sm:hidden p-2.5 rounded-lg hover:bg-secondary transition-colors focus-ring"
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {mobileOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ opacity: 0, rotate: -90 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    exit={{ opacity: 0, rotate: 90 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <CloseIcon className="h-5 w-5 text-foreground" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ opacity: 0, rotate: 90 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    exit={{ opacity: 0, rotate: -90 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <MenuIcon className="h-5 w-5 text-foreground" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </button>
+            {/* Mobile: theme + hamburger */}
+            <div className="sm:hidden flex items-center gap-3">
+              <ThemeToggle />
+              <button
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="flex flex-col gap-1.5 p-2"
+                aria-label="Toggle menu"
+              >
+                {[0, 1, 2].map((i) => (
+                  <motion.span
+                    key={i}
+                    animate={
+                      mobileOpen
+                        ? i === 0
+                          ? { rotate: 45, y: 7 }
+                          : i === 1
+                            ? { opacity: 0 }
+                            : { rotate: -45, y: -7 }
+                        : { rotate: 0, y: 0, opacity: 1 }
+                    }
+                    className="block w-5 h-0.5 origin-center"
+                    style={{ background: "var(--foreground)" }}
+                  />
+                ))}
+              </button>
+            </div>
           </div>
-        </Container>
-      </motion.div>
+        </div>
+      </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="sm:hidden bg-card/95 backdrop-blur-xl border-b border-border overflow-hidden"
+            className="sm:hidden border-b overflow-hidden"
+            style={{ background: "var(--card)", borderColor: "var(--border)" }}
           >
-            <Container>
-              <nav className="py-4 space-y-1">
-                {navItems.map((item, index) => {
-                  const isActive = pathname === item.path;
-                  const Icon = item.icon;
-
-                  return (
-                    <motion.div
-                      key={item.path}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <Link
-                        href={item.path}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-colors",
-                          isActive
-                            ? "bg-secondary text-foreground"
-                            : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground",
-                        )}
-                      >
-                        <Icon className="h-5 w-5" strokeWidth={2} />
-                        <span>{item.label}</span>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </nav>
-            </Container>
+            <div className="px-6 py-4 space-y-1">
+              {[
+                { path: "/", label: "Battle" },
+                { path: "/leaderboard", label: "Rankings" },
+              ].map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-3 text-[12px] font-black tracking-[0.1em] uppercase border-l-2 transition-colors"
+                  style={{
+                    color:
+                      pathname === item.path
+                        ? "var(--amber)"
+                        : "var(--text-secondary)",
+                    borderColor:
+                      pathname === item.path ? "var(--amber)" : "transparent",
+                  }}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
